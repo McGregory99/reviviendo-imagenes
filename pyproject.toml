@@ -1,0 +1,15 @@
+[project]
+name = "reviviendo-imagenes"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.129.0",
+    "python-dotenv>=1.2.1",
+    "python-multipart>=0.0.22",
+    "replicate>=1.0.7",
+    "requests>=2.32.5",
+    "streamlit>=1.54.0",
+    "uvicorn>=0.41.0",
+]
+
