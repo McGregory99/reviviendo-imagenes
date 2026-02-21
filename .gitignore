@@ -15,6 +15,8 @@ backend/.env
 # Streamlit secrets
 frontend/.streamlit/secrets.toml
 
+# Temporary files
+backend/temp/
 
 # IDE
 .vscode/
