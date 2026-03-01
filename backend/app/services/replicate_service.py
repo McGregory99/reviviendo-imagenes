@@ -1,3 +1,4 @@
+import io
 import os
 import replicate
 from dotenv import load_dotenv
@@ -9,52 +10,33 @@ class ReplicateService:
     def __init__(self):
         self.client = replicate.Client(api_token=os.getenv("REPLICATE_API_TOKEN"))
 
-    def colorize_img(self, image_path: str) -> str:
-        # 1) Abrimos la imagen original en modo binario para enviarla a Replicate
-        image = open(image_path, "rb")
-        input = {
-            "image": image
-        }
-
-        # 2) Llamamos al modelo de colorización y esperamos el resultado
+    def colorize_img(self, image_bytes: bytes, original_filename: str) -> tuple[bytes, str]:
+        # 1) Enviamos los bytes directamente a Replicate (sin guardar en disco)
         output = self.client.run(
             "piddnad/ddcolor:ca494ba129e44e45f661d6ece83c4c98a9a7c774309beca01429b58fce8aa695",
-            input=input
+            input={"image": io.BytesIO(image_bytes)}
         )
-        # 3) Construimos el nombre del archivo de salida
-        filename = os.path.basename(image_path).replace(".", "_colorized.")
-        output_path = f"backend/temp/{filename}"
 
-        # 4) Descargamos la imagen resultante desde la URL que devuelve Replicate
+        # 2) Construimos el nombre del archivo de salida
+        name, ext = original_filename.rsplit(".", 1)
+        filename = f"{name}_colorized.{ext}"
+
+        # 3) Descargamos los bytes de la imagen colorizada desde Replicate
         response = requests.get(str(output))
+        return response.content, filename
 
-        # 5) Guardamos la imagen colorizada en local
-        with open(output_path, "wb") as f:
-            f.write(response.content)        
-        return output_path
 
-    def img_to_vid(self, image_path: str, prompt: str) -> str:
-        # 1) Abrimos la imagen original en modo binario para enviarla a Replicate
-        image = open(image_path, "rb")
-        input = {
-            "image": image,
-            "prompt": prompt
-        }
-
-        # 2) Llamamos al modelo de video y esperamos el resultado
+    def img_to_vid(self, image_url: str, prompt: str) -> tuple[bytes, str]:
+        # 1) Pasamos la URL pública de Supabase Storage directamente a Replicate
         output = self.client.run(
             "wan-video/wan-2.5-i2v-fast",
-            input=input
+            input={"image": image_url, "prompt": prompt}
         )
 
-        # 3) Construimos el nombre del archivo de salida
-        filename = os.path.splitext(os.path.basename(image_path))[0] + "_video.mp4"
-        output_path = f"backend/temp/{filename}"
+        # 2) Construimos el nombre del archivo de salida
+        base = image_url.split("/")[-1].rsplit(".", 1)[0]
+        filename = f"{base}_video.mp4"
 
-        # 4) Descargamos el video resultante desde la URL que devuelve Replicate
+        # 3) Descargamos los bytes del video desde Replicate
         response = requests.get(str(output))
-
-        # 5) Guardamos el video en local
-        with open(output_path, "wb") as f:
-            f.write(response.content)        
-        return output_path
+        return response.content, filename
