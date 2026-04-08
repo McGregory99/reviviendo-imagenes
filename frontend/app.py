@@ -149,8 +149,9 @@ with col2:
             )
         if response.status_code == 200:
             st.session_state.video_url = response.json()["video_url"]
-
-        st.rerun()
+            st.rerun()
+        else:
+            st.error(f"Error generando video: {response.status_code} - {response.text}")
 
 with col3:
     if step1_done:
