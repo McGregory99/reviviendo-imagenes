@@ -17,6 +17,8 @@ if "video_url" not in st.session_state:
     st.session_state.video_url = None
 if "uploaded_file_data" not in st.session_state:
     st.session_state.uploaded_file_data = None
+if "transformation_id" not in st.session_state:
+    st.session_state.transformation_id = None
 if "show_history" not in st.session_state:
     st.session_state.show_history = False
 
@@ -63,6 +65,7 @@ if st.sidebar.button("Cerrar Sesión"):
     st.session_state.colorized_url = None
     st.session_state.video_url = None
     st.session_state.uploaded_file_data = None
+    st.session_state.transformation_id = None
     st.session_state.show_history = False
     st.rerun()
 
@@ -130,6 +133,7 @@ with col1:
             )
         if response.status_code == 200:
             st.session_state.colorized_url = response.json()["image_url"]
+            st.session_state.transformation_id = response.json()["transformation_id"]
 
         st.rerun()
 
@@ -139,7 +143,7 @@ with col2:
     if st.button("Generar Video", disabled=not step1_done or not prompt):
         response = requests.post(
             f"{BACKEND_URL}/generate-video", 
-            data={"colorized_url": st.session_state.colorized_url, "prompt": prompt},
+            data={"colorized_url": st.session_state.colorized_url, "prompt": prompt, "transformation_id": st.session_state.transformation_id},
             headers={"Authorization": f"Bearer {st.session_state.access_token}"}
             )
         if response.status_code == 200:
