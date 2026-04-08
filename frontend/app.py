@@ -55,7 +55,8 @@ if st.session_state.user is None:
 # barra lateral
 st.sidebar.text(st.session_state.user.email)
 st.sidebar.code(st.session_state.access_token)
-if st.sidebar.button("Mi Historial"):
+label = "Menu Principal" if st.session_state.show_history else "Mi Historial"
+if st.sidebar.button(label):
     st.session_state.show_history = not st.session_state.show_history
     st.rerun()
 if st.sidebar.button("Cerrar Sesión"):
